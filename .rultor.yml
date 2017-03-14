@@ -1,0 +1,21 @@
+assets:
+  rubygems.yml: zerocracy/home#assets/rubygems.yml
+release:
+  script: |-
+    sudo bundle install
+    rake
+    rm -rf *.gem
+    sed -i "s/1\.0\.snapshot/${tag}/g" lib/tdx/version.rb
+    git add lib/tdx/version.rb
+    git commit -m "version set to ${tag}"
+    gem build tdx.gemspec
+    chmod 0600 ../rubygems.yml
+    gem push *.gem --config-file ../rubygems.yml
+  commanders:
+  - yegor256
+architect:
+- yegor256
+- davvd
+merge:
+  commanders: []
+deploy: {}
