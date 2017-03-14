@@ -1,6 +1,9 @@
-MethodLength:
-  Max: 30
-Style/ClassLength:
+AllCops:
+  DisplayCopNames: true
+
+Metrics/MethodLength:
+  Max: 50
+Metrics/ClassLength:
   Max: 150
 Metrics/AbcSize:
   Max: 37

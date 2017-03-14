@@ -23,43 +23,49 @@
 
 STDOUT.sync = true
 
-require 'tdx'
 require 'slop'
-require 'tdx/version'
-require 'tdx/base'
+require 'tdx'
 
 args = ARGV
 
 opts = Slop.parse(args, strict: true, help: true) do
   banner "Usage (#{TDX::VERSION}): tdx [options]"
-  on 'version', 'Show current version'
+  on('version', 'Show current version')
   on(
     'r',
     'repo',
     'Repository URI, e.g. "git@github.com:yegor256/tdx.git"',
+    type: String,
     argument: :required,
     limit: 1
   )
   on(
     'tests',
     'Comma-separated list of relative paths with test-related files',
+    type: String,
     argument: :required,
     limit: 1
   )
   on(
     'login',
     'GitHub login',
+    argument: :required,
+    type: String,
     limit: 1
   )
   on(
     'password',
     'GitHub password',
+    argument: :required,
+    type: String,
     limit: 1
   )
   on(
     's',
     'svg',
     'Full path of the SVG file to generate (STDOUT otherwise)',
+    argument: :required,
+    type: String,
     limit: 1
   )
 end

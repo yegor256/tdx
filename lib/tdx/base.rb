@@ -28,6 +28,7 @@ require 'fileutils'
 # Copyright:: Copyright (c) 2017 Yegor Bugayenko
 # License:: MIT
 module TDX
+  # Base class
   class Base
     def initialize(opts)
       @opts = opts
@@ -36,12 +37,13 @@ module TDX
     def svg
       dat = Tempfile.new('tdx.dat')
       version = `git --version`.split(/ /)[2]
-      fail "git version #{version} is too old, upgrade it to 2.0+" unless
+      raise "git version #{version} is too old, upgrade it to 2.0+" unless
         Gem::Version.new(version) >= Gem::Version.new('2.0')
-      path = checkout()
-      commits = `cd "#{path}" && git log '--pretty=format:%H %cI' --reverse`
+      path = checkout
+      commits =
+        `cd "#{path}" && git log '--pretty=format:%H %cI' --reverse`
         .split(/\n/)
-        .map{ |c| c.split(' ') }
+        .map { |c| c.split(' ') }
       issues = issues(commits)
       commits.each do |sha, date|
         `cd "#{path}" && git checkout --quiet #{sha}`
@@ -62,7 +64,8 @@ module TDX
         'set autoscale',
         'set style fill solid',
         'set boxwidth 0.75 relative',
-        "plot \"#{dat.path}\" using 1:2 with boxes title \"Test HoC\" linecolor rgb \"#81b341\"",
+        "plot \"#{dat.path}\" using 1:2 with boxes \
+title \"Test HoC\" linecolor rgb \"#81b341\""
       ]
       `gnuplot -e '#{gpi.join(';')}' 2>/dev/null`
       FileUtils.rm_rf(path)
@@ -94,12 +97,12 @@ module TDX
       end
     end
 
-    def hoc(path)
+    def hoc(_)
       1
       # `cd "#{path}" && hoc`
     end
 
-    def tests(path)
+    def tests(_)
       50
       # `cd "#{path}" && hoc`
     end
@@ -107,7 +110,7 @@ module TDX
     def issues(commits)
       dates = []
       # dates = github.issues.map{ |i| i.created_at }
-      commits.map{ |sha, date| [sha, dates.select{ |d| d < date }.size ] }.to_h
+      commits.map { |sha, date| [sha, dates.select { |d| d < date }.size] }.to_h
     end
   end
 end

@@ -38,7 +38,7 @@ After do
   FileUtils.rm_rf(@dir) if File.exist?(@dir)
 end
 
-Given(/^I have a Git repository in .\/repo$/) do
+Given(%r{^I have a Git repository in ./repo$}) do
   raise unless system("
     set -e
     cd '#{@dir}'
@@ -68,8 +68,14 @@ Then(/^Exit code is not zero$/) do
 end
 
 Then(/^SVG is valid in "([^"]+)"$/) do |path|
-  raise "XML doesn't match \"#{xpath}\":\n#{@xml}" if \
-    Nokogiri::load(path).xpath('/svg//path').empty?
+  data = File.read(path)
+  xml = Nokogiri::XML.parse(data)
+  xml.remove_namespaces!
+  raise "SVG is broken: #{xml}" if xml.xpath('/svg//path').empty?
+end
+
+Then(/^Stdout is empty$/) do
+  raise "STDOUT is not empty:\n#{@stdout}" unless @stdout == ''
 end
 
 Then(/^Stdout contains "([^"]*)"$/) do |txt|

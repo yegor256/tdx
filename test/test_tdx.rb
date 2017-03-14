@@ -20,10 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'minitest/autorun'
 require 'tdx'
-require 'tdx/base'
 require 'tmpdir'
+require 'minitest/autorun'
 require 'slop'
 
 # TDX main module test.

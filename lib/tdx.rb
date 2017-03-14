@@ -21,3 +21,4 @@
 # SOFTWARE.
 
 require 'tdx/base'
+require 'tdx/version'
