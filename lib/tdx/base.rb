@@ -46,10 +46,11 @@ module TDX
         .split(/\n/)
         .map { |c| c.split(' ') }
       issues = issues(commits)
+      puts "Date\tTest\tHoC\tFiles\tLoC\tIssues\tSHA"
       commits.each do |sha, date|
         `cd "#{path}" && git checkout --quiet #{sha}`
-        line = "#{date} #{tests(path)} #{hoc(path)} #{files(path)} \
-#{loc(path)} #{issues[sha]} #{sha[0, 7]}"
+        line = "#{date[0, 10]}\t#{tests(path)}\t#{hoc(path)}\t#{files(path)}\t\
+#{loc(path)}\t#{issues[sha]}\t#{sha[0, 7]}"
         dat << "#{line}\n"
         puts line
       end
@@ -67,10 +68,16 @@ module TDX
         'set autoscale',
         'set style fill solid',
         'set boxwidth 0.75 relative',
-        "plot \"#{dat.path}\" using 1:2 with boxes \
-title \"Test HoC\" linecolor rgb \"#81b341\""
+        [
+          "plot \"#{dat.path}\" using 1:2 with boxes",
+          'title "Test HoC" linecolor rgb "#81b341"',
+          ', "" using 1:3 with boxes title "HoC" linecolor rgb "red"',
+          ', "" using 1:4 with boxes title "Files" linecolor rgb "black"',
+          ', "" using 1:5 with boxes title "LoC" linecolor rgb "cyan"',
+          ', "" using 1:6 with boxes title "Issues" linecolor rgb "orange"'
+        ].join(' ')
       ]
-      `gnuplot -e '#{gpi.join(';')}' 2>/dev/null`
+      `gnuplot -e '#{gpi.join(';')}'`
       FileUtils.rm_rf(path)
       File.delete(dat)
       xml = File.read(svg)
