@@ -15,8 +15,8 @@ I will tell you later...
 ## How to Install?
 
 First, install
-gnuplot,
-cloc,
+[gnuplot](http://www.gnuplot.info/),
+[cloc](http://cloc.sourceforge.net/),
 and
 [hoc](https://github.com/yegor256/hoc).
 
