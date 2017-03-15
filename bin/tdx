@@ -28,46 +28,17 @@ require 'tdx'
 
 args = ARGV
 
-opts = Slop.parse(args, strict: true, help: true) do
-  banner "Usage (#{TDX::VERSION}): tdx [options]"
-  on('version', 'Show current version')
-  on(
-    'r',
-    'repo',
-    'Repository URI, e.g. "git@github.com:yegor256/tdx.git"',
-    type: String,
-    argument: :required,
-    limit: 1
-  )
-  on(
-    'tests',
+opts = Slop.parse(args, strict: true, help: true) do |o|
+  o.banner = "Usage (#{TDX::VERSION}): tdx [options] <GitHub URI> <SVG path>"
+  o.bool '-h', '--help', 'Show usage summary'
+  o.bool '-v', '--version', 'Show current version'
+  o.array(
+    '--tests',
     'Comma-separated list of relative paths with test-related files',
-    type: String,
-    argument: :required,
-    limit: 1
+    delimiter: ','
   )
-  on(
-    'login',
-    'GitHub login',
-    argument: :required,
-    type: String,
-    limit: 1
-  )
-  on(
-    'password',
-    'GitHub password',
-    argument: :required,
-    type: String,
-    limit: 1
-  )
-  on(
-    's',
-    'svg',
-    'Full path of the SVG file to generate (STDOUT otherwise)',
-    argument: :required,
-    type: String,
-    limit: 1
-  )
+  o.string '--login', 'GitHub login'
+  o.string '--password', 'GitHub password'
 end
 
 if opts.help?
@@ -80,11 +51,12 @@ if opts.version?
   exit
 end
 
+if opts.arguments.length < 2
+  puts 'URI and SVG path are required'
+  exit
+end
+
 Encoding.default_external = Encoding::UTF_8
 Encoding.default_internal = Encoding::UTF_8
-output = TDX::Base.new(opts).svg
-if opts[:svg]
-  File.new(opts[:svg], 'w') << output
-else
-  puts output
-end
+output = TDX::Base.new(opts.arguments[0], opts).svg
+File.new(opts.arguments[1], 'w') << output

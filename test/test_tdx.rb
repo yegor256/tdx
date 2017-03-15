@@ -35,7 +35,6 @@ class TestPDD < Minitest::Test
     Dir.mktmpdir 'test' do |dir|
       opts = opts(
         [
-          '--repo', "file:///#{File.join(dir, 'repo')}",
           '--tests', 'tests'
         ]
       )
@@ -51,18 +50,19 @@ class TestPDD < Minitest::Test
         mkdir tests
         echo 'c = 3' > tests/3.py && git add tests/3.py && git commit -qam '3'
       ")
-      assert(TDX::Base.new(opts).svg.include?('<path '))
+      assert(
+        TDX::Base.new(
+          "file:///#{File.join(dir, 'repo')}", opts
+        ).svg.include?('<path ')
+      )
     end
   end
 
   private
 
   def opts(args)
-    Slop.parse args do
-      on 'p', 'path', argument: :required
-      on 's', 'svg', argument: :required
-      on 'r', 'repo', argument: :required
-      on 't', 'tests', argument: :required
+    Slop.parse args do |o|
+      o.string '-t', '--tests', argument: :required
     end
   end
 end

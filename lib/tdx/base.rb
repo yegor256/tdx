@@ -30,7 +30,8 @@ require 'fileutils'
 module TDX
   # Base class
   class Base
-    def initialize(opts)
+    def initialize(uri, opts)
+      @uri = uri
       @opts = opts
     end
 
@@ -79,7 +80,7 @@ title \"Test HoC\" linecolor rgb \"#81b341\""
 
     def checkout
       dir = Dir.mktmpdir
-      `cd #{dir} && git clone --quiet #{@opts[:repo]} .`
+      `cd #{dir} && git clone --quiet #{@uri} .`
       dir
     end
 
