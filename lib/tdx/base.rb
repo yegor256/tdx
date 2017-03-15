@@ -24,6 +24,7 @@ require 'date'
 require 'yaml'
 require 'octokit'
 require 'fileutils'
+require 'English'
 
 # TDX main module.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -38,7 +39,7 @@ module TDX
     end
 
     def svg
-      dat = Tempfile.new('tdx.dat')
+      dat = Tempfile.new('tdx')
       version = `git --version`.split(/ /)[2]
       raise "git version #{version} is too old, upgrade it to 2.0+" unless
         Gem::Version.new(version) >= Gem::Version.new('2.0')
@@ -48,16 +49,17 @@ module TDX
         .split(/\n/)
         .map { |c| c.split(' ') }
       issues = issues(commits)
-      puts "Date\tTest\tHoC\tFiles\tLoC\tIssues\tSHA"
+      puts "Date\t\tTest\tHoC\tFiles\tLoC\tIssues\tSHA"
       commits.each do |sha, date|
         `cd "#{path}" && git checkout --quiet #{sha}`
+        raise 'Failed to checkout' unless $CHILD_STATUS.exitstatus == 0
         line = "#{date[0, 10]}\t#{tests(path)}\t#{hoc(path)}\t#{files(path)}\t\
 #{loc(path)}\t#{issues[sha]}\t#{sha[0, 7]}"
         dat << "#{line}\n"
         puts line
       end
       dat.close
-      svg = Tempfile.new('tdx.svg')
+      svg = Tempfile.new('tdx')
       gpi = [
         "set output \"#{svg.path}\"",
         'set terminal svg size 700, 260',
@@ -79,7 +81,8 @@ module TDX
           ', "" using 1:6 with boxes title "Issues" linecolor rgb "orange"'
         ].join(' ')
       ]
-      `gnuplot -e '#{gpi.join(';')}'`
+      `gnuplot -e '#{gpi.join('; ')}'`
+      raise 'Failed to run Gnuplot' unless $CHILD_STATUS.exitstatus == 0
       FileUtils.rm_rf(path)
       File.delete(dat)
       xml = File.read(svg)
@@ -92,6 +95,7 @@ module TDX
     def checkout
       dir = Dir.mktmpdir
       `cd #{dir} && git clone --quiet #{@uri} .`
+      raise 'Failed to clone repository' unless $CHILD_STATUS.exitstatus == 0
       size = Dir.glob(File.join(dir, '**/*'))
         .map(&:size)
         .inject(0) { |a, e| a + e }
@@ -104,7 +108,8 @@ module TDX
     end
 
     def loc(path)
-      cloc = `cd "#{path}" && cloc . --yaml --quiet 2>/dev/null`
+      cloc = `cd "#{path}" && cloc . --yaml --quiet`
+      raise 'Failed to run cloc' unless $CHILD_STATUS.exitstatus == 0
       yaml = YAML.load(cloc)
       if yaml
         yaml['SUM']['code']
@@ -114,11 +119,15 @@ module TDX
     end
 
     def hoc(path)
-      `cd "#{path}" && hoc`
+      hoc = `cd "#{path}" && hoc`
+      raise 'Failed to run hoc' unless $CHILD_STATUS.exitstatus == 0
+      hoc
     end
 
     def tests(path)
-      `cd "#{path}" && hoc`
+      hoc = `cd "#{path}" && hoc`
+      raise 'Failed to run hoc' unless $CHILD_STATUS.exitstatus == 0
+      hoc
     end
 
     def issues(commits)
@@ -129,7 +138,6 @@ module TDX
           Octokit::Client.new
         end
         repo = @uri.gsub(/^git@github.com:|.git$/, '')
-        puts repo
         client.list_issues(repo, state: :all).map(&:created_at)
       else
         []
