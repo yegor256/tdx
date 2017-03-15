@@ -53,7 +53,7 @@ module TDX
         Exec.new("git checkout --quiet #{sha}", path).stdout
         {
           date: date,
-          tests: tests(path),
+          pure: pure(path),
           hoc: hoc(path),
           files: files(path),
           loc: loc(path),
@@ -62,28 +62,29 @@ module TDX
         }
       end
       metrics.each do |m|
-        puts "#{m[:date][0, 16]}\t#{m[:tests]}\t#{m[:hoc]}\t#{m[:files]}\t\
+        puts "#{m[:date][0, 16]}\t#{m[:pure]}\t#{m[:hoc]}\t#{m[:files]}\t\
 #{m[:loc]}\t#{m[:issues]}\t#{m[:sha][0, 7]}"
       end
-      max = { tests: 0, hoc: 0, files: 0, loc: 0, issues: 0 }
+      max = { pure: 0, hoc: 0, files: 0, loc: 0, issues: 0 }
       max = metrics.inject(max) do |m, t|
         {
-          tests: [m[:tests], t[:tests], 1].max.to_f,
-          hoc: [m[:hoc], t[:hoc], 1].max.to_f,
-          files: [m[:files], t[:files], 1].max.to_f,
-          loc: [m[:loc], t[:loc], 1].max.to_f,
-          issues: [m[:issues], t[:issues], 1].max.to_f
+          pure: [m[:pure], t[:pure], 1].max,
+          hoc: [m[:hoc], t[:hoc], 1].max,
+          files: [m[:files], t[:files], 1].max,
+          loc: [m[:loc], t[:loc], 1].max,
+          issues: [m[:issues], t[:issues], 1].max
         }
       end
       dat = Tempfile.new('tdx')
       metrics.each do |m|
         dat << [
           m[:date],
-          m[:tests] / max[:tests],
-          m[:hoc] / max[:hoc],
-          m[:files] / max[:files],
-          m[:loc] / max[:loc],
-          m[:issues] / max[:issues],
+          100.0 * m[:pure] / max[:pure],
+          100.0 * (m[:pure] - m[:hoc]) / (max[:pure] - max[:hoc]),
+          100.0 * m[:hoc] / max[:hoc],
+          100.0 * m[:files] / max[:files],
+          100.0 * m[:loc] / max[:loc],
+          100.0 * m[:issues] / max[:issues],
           m[:sha]
         ].join(' ') + "\n"
       end
@@ -102,12 +103,10 @@ module TDX
         'set style fill solid',
         'set boxwidth 0.75 relative',
         [
-          "plot \"#{dat.path}\" using 1:2 with lines",
+          "plot \"#{dat.path}\" using 1:3 with lines",
           'title "Test HoC" linecolor rgb "#81b341"',
-          ', "" using 1:3 with lines title "HoC" linecolor rgb "red"',
-          ', "" using 1:4 with lines title "Files" linecolor rgb "black"',
-          ', "" using 1:5 with lines title "LoC" linecolor rgb "cyan"',
-          ', "" using 1:6 with lines title "Issues" linecolor rgb "orange"'
+          ', "" using 1:4 with lines title "HoC" linecolor rgb "red"',
+          ', "" using 1:7 with lines title "Issues" linecolor rgb "orange"'
         ].join(' ')
       ]
       Exec.new("gnuplot -e '#{gpi.join('; ')}'").stdout
@@ -139,11 +138,19 @@ module TDX
         .xpath('/results/languages/total/@code')[0].to_s.to_i
     end
 
-    def hoc(path)
-      Exec.new('hoc', path).stdout.strip.to_i
+    def pure(path)
+      exclude = if @opts[:tests]
+        @opts[:tests].map { |e| "--exclude=#{e}" }
+      else
+        []
+      end
+      Exec.new(
+        'hoc ' + exclude.join(' '),
+        path
+      ).stdout.strip.to_i
     end
 
-    def tests(path)
+    def hoc(path)
       Exec.new('hoc', path).stdout.strip.to_i
     end
 

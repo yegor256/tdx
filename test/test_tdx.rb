@@ -33,11 +33,6 @@ class TestPDD < Minitest::Test
   def test_git_repo
     skip if Gem.win_platform?
     Dir.mktmpdir 'test' do |dir|
-      opts = opts(
-        [
-          '--tests', 'tests'
-        ]
-      )
       raise unless system("
         set -e
         cd '#{dir}'
@@ -52,17 +47,20 @@ class TestPDD < Minitest::Test
       ")
       assert(
         TDX::Base.new(
-          "file:///#{File.join(dir, 'repo')}", opts
+          "file:///#{File.join(dir, 'repo')}",
+          opts(['--tests', 'tests/**/*'])
         ).svg.include?('<path ')
       )
     end
   end
 
   def test_real_github_repo
-    assert(
+    File.write(
+      '/tmp/a.svg',
       TDX::Base.new(
-        'https://github.com/yegor256/tdx.git', opts([])
-      ).svg.include?('<path ')
+        'https://github.com/yegor256/jare.git',
+        opts(['--tests', 'src/test/**/*'])
+      ).svg
     )
   end
 
@@ -70,7 +68,7 @@ class TestPDD < Minitest::Test
 
   def opts(args)
     Slop.parse args do |o|
-      o.string '-t', '--tests', argument: :required
+      o.array '-t', '--tests', argument: :required
     end
   end
 end

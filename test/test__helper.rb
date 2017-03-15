@@ -23,3 +23,5 @@
 require 'simplecov'
 require 'tdx'
 require 'minitest/autorun'
+
+STDOUT.sync = true

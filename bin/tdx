@@ -34,7 +34,7 @@ opts = Slop.parse(args, strict: true, help: true) do |o|
   o.bool '-v', '--version', 'Show current version'
   o.array(
     '--tests',
-    'Comma-separated list of relative paths with test-related files',
+    'Comma-separated list of glob masks with test-related files',
     delimiter: ','
   )
   o.string '--login', 'GitHub login'
