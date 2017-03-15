@@ -40,7 +40,7 @@ module TDX
 
     def stdout
       out = `cd #{@dir} && #{@cmd} 2>/dev/null`
-      raise 'Previous command failed' unless $CHILD_STATUS.exitstatus == 0
+      raise "This one failed: #{@cmd}" unless $CHILD_STATUS.exitstatus == 0
       out
     end
   end

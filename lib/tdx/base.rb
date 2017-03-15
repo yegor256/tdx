@@ -41,22 +41,51 @@ module TDX
     end
 
     def svg
-      dat = Tempfile.new('tdx')
       version = Exec.new('git --version').stdout.split(/ /)[2]
       raise "git version #{version} is too old, upgrade it to 2.0+" unless
         Gem::Version.new(version) >= Gem::Version.new('2.0')
       path = checkout
-
       commits = Exec.new('git log "--pretty=format:%H %cI" --reverse', path)
         .stdout.split(/\n/).map { |c| c.split(' ') }
       issues = issues(commits)
       puts "Date\t\t\tTest\tHoC\tFiles\tLoC\tIssues\tSHA"
-      commits.each do |sha, date|
+      metrics = commits.map do |sha, date|
         Exec.new("git checkout --quiet #{sha}", path).stdout
-        line = "#{date[0, 16]}\t#{tests(path)}\t#{hoc(path)}\t#{files(path)}\t\
-#{loc(path)}\t#{issues[sha]}\t#{sha[0, 7]}"
-        dat << "#{line}\n"
-        puts line
+        {
+          date: date,
+          tests: tests(path),
+          hoc: hoc(path),
+          files: files(path),
+          loc: loc(path),
+          issues: issues[sha],
+          sha: sha
+        }
+      end
+      metrics.each do |m|
+        puts "#{m[:date][0, 16]}\t#{m[:tests]}\t#{m[:hoc]}\t#{m[:files]}\t\
+#{m[:loc]}\t#{m[:issues]}\t#{m[:sha][0, 7]}"
+      end
+      max = { tests: 0, hoc: 0, files: 0, loc: 0, issues: 0 }
+      max = metrics.inject(max) do |m, t|
+        {
+          tests: [m[:tests], t[:tests], 1].max.to_f,
+          hoc: [m[:hoc], t[:hoc], 1].max.to_f,
+          files: [m[:files], t[:files], 1].max.to_f,
+          loc: [m[:loc], t[:loc], 1].max.to_f,
+          issues: [m[:issues], t[:issues], 1].max.to_f
+        }
+      end
+      dat = Tempfile.new('tdx')
+      metrics.each do |m|
+        dat << [
+          m[:date],
+          m[:tests] / max[:tests],
+          m[:hoc] / max[:hoc],
+          m[:files] / max[:files],
+          m[:loc] / max[:loc],
+          m[:issues] / max[:issues],
+          m[:sha]
+        ].join(' ') + "\n"
       end
       dat.close
       svg = Tempfile.new('tdx')
@@ -66,19 +95,19 @@ module TDX
         'set termoption font "monospace,10"',
         'set xdata time',
         'set timefmt "%Y-%m"',
-        'set ytics format "%.0f%%" textcolor rgb "#81b341"',
+        'set ytics format "%.0f%%" textcolor rgb "black"',
         'set grid linecolor rgb "gray"',
         'set xtics format "%b/%y" font "monospace,8" textcolor rgb "black"',
         'set autoscale',
         'set style fill solid',
         'set boxwidth 0.75 relative',
         [
-          "plot \"#{dat.path}\" using 1:2 with boxes",
+          "plot \"#{dat.path}\" using 1:2 with lines",
           'title "Test HoC" linecolor rgb "#81b341"',
-          ', "" using 1:3 with boxes title "HoC" linecolor rgb "red"',
-          ', "" using 1:4 with boxes title "Files" linecolor rgb "black"',
-          ', "" using 1:5 with boxes title "LoC" linecolor rgb "cyan"',
-          ', "" using 1:6 with boxes title "Issues" linecolor rgb "orange"'
+          ', "" using 1:3 with lines title "HoC" linecolor rgb "red"',
+          ', "" using 1:4 with lines title "Files" linecolor rgb "black"',
+          ', "" using 1:5 with lines title "LoC" linecolor rgb "cyan"',
+          ', "" using 1:6 with lines title "Issues" linecolor rgb "orange"'
         ].join(' ')
       ]
       Exec.new("gnuplot -e '#{gpi.join('; ')}'").stdout
@@ -107,15 +136,15 @@ module TDX
 
     def loc(path)
       Nokogiri::XML.parse(Exec.new('cloc . --xml --quiet', path).stdout)
-        .xpath('/results/languages/total/@code')
+        .xpath('/results/languages/total/@code')[0].to_s.to_i
     end
 
     def hoc(path)
-      Exec.new('hoc', path).stdout.strip
+      Exec.new('hoc', path).stdout.strip.to_i
     end
 
     def tests(path)
-      Exec.new('hoc', path).stdout.strip
+      Exec.new('hoc', path).stdout.strip.to_i
     end
 
     def issues(commits)
