@@ -3,7 +3,7 @@
 
 [![Build Status](https://travis-ci.org/yegor256/tdx.svg)](https://travis-ci.org/yegor256/tdx)
 [![PDD status](http://www.0pdd.com/svg?name=yegor256/tdx)](http://www.0pdd.com/p?name=yegor256/tdx)
-[![Gem Version](https://badge.fury.io/rb/pdd.svg)](http://badge.fury.io/rb/pdd)
+[![Gem Version](https://badge.fury.io/rb/tdx.svg)](http://badge.fury.io/rb/tdx)
 [![Dependency Status](https://gemnasium.com/yegor256/tdx.svg)](https://gemnasium.com/yegor256/tdx)
 [![Code Climate](http://img.shields.io/codeclimate/github/yegor256/tdx.svg)](https://codeclimate.com/github/yegor256/tdx)
 [![Coverage Status](https://img.shields.io/coveralls/yegor256/tdx.svg)](https://coveralls.io/r/yegor256/tdx)
