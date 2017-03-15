@@ -97,14 +97,12 @@ title \"Test HoC\" linecolor rgb \"#81b341\""
       end
     end
 
-    def hoc(_)
-      1
-      # `cd "#{path}" && hoc`
+    def hoc(path)
+      `cd "#{path}" && hoc`
     end
 
-    def tests(_)
-      50
-      # `cd "#{path}" && hoc`
+    def tests(path)
+      `cd "#{path}" && hoc`
     end
 
     def issues(commits)
