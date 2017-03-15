@@ -61,7 +61,7 @@ class TestPDD < Minitest::Test
   def test_real_github_repo
     assert(
       TDX::Base.new(
-        'git@github.com:yegor256/tdx.git', opts([])
+        'https://github.com/yegor256/tdx.git', opts([])
       ).svg.include?('<path ')
     )
   end

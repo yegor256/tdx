@@ -131,13 +131,17 @@ module TDX
     end
 
     def issues(commits)
-      dates = if @uri.start_with?('git@')
+      dates = if @uri.include?('github.com')
         client = if @opts[:login]
           Octokit::Client.new(login: @opts[:login], password: @opts[:password])
         else
           Octokit::Client.new
         end
-        repo = @uri.gsub(/^git@github.com:|.git$/, '')
+        repo = if @uri.start_with?('git@')
+          @uri.gsub(/^git@github\.com:|\.git$/, '')
+        else
+          @uri.gsub(%r{^https://github\.com/|\.git$}, '')
+        end
         client.list_issues(repo, state: :all).map(&:created_at)
       else
         []
