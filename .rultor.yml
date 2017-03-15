@@ -1,10 +1,9 @@
 assets:
   rubygems.yml: zerocracy/home#assets/rubygems.yml
-install:
-  script: |-
-    sudo gem install hoc
-    sudo apt-get install -y cloc
-    sudo apt-get install -y gnuplot
+install: |-
+  sudo gem install hoc
+  sudo apt-get install -y cloc
+  sudo apt-get install -y gnuplot
 release:
   script: |-
     sudo bundle install
