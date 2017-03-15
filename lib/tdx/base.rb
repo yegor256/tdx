@@ -24,6 +24,7 @@ require 'date'
 require 'yaml'
 require 'octokit'
 require 'fileutils'
+require 'nokogiri'
 require 'English'
 require 'tdx/exec'
 
@@ -105,12 +106,8 @@ module TDX
     end
 
     def loc(path)
-      yaml = YAML.load(Exec.new('cloc . --yaml --quiet', path).stdout)
-      if yaml
-        yaml['SUM']['code']
-      else
-        0
-      end
+      Nokogiri::XML.parse(Exec.new('cloc . --xml --quiet', path).stdout)
+        .xpath('/results/languages/total/@code')
     end
 
     def hoc(path)
