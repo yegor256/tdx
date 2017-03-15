@@ -14,7 +14,6 @@ Feature: Command Line Processing
   Scenario: Simple SVG is built
     Given I have a Git repository in ./repo
     When I run bin/tdx with "file://$(pwd)/repo pic.svg"
-    Then Stdout is empty
     Then Exit code is zero
     And SVG is valid in "pic.svg"
 

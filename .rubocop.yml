@@ -7,3 +7,6 @@ Metrics/ClassLength:
   Max: 150
 Metrics/AbcSize:
   Max: 37
+Style/MultilineMethodCallIndentation:
+  Enabled: false
+

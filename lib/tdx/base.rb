@@ -48,8 +48,10 @@ module TDX
       issues = issues(commits)
       commits.each do |sha, date|
         `cd "#{path}" && git checkout --quiet #{sha}`
-        dat << "#{date} #{tests(path)} #{hoc(path)} #{files(path)}"
-        dat << " #{loc(path)} #{issues[sha]}\n"
+        line = "#{date} #{tests(path)} #{hoc(path)} #{files(path)} \
+#{loc(path)} #{issues[sha]} #{sha[0, 7]}"
+        dat << "#{line}\n"
+        puts line
       end
       dat.close
       svg = Tempfile.new('tdx.svg')
@@ -81,6 +83,10 @@ title \"Test HoC\" linecolor rgb \"#81b341\""
     def checkout
       dir = Dir.mktmpdir
       `cd #{dir} && git clone --quiet #{@uri} .`
+      size = Dir.glob(File.join(dir, '**/*'))
+        .map(&:size)
+        .inject(0) { |a, e| a + e }
+      puts "Cloned #{@uri} (#{size / 1024}Kb) into temporary directory"
       dir
     end
 
