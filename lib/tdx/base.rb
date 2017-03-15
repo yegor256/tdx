@@ -20,7 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'date'
 require 'yaml'
+require 'octokit'
 require 'fileutils'
 
 # TDX main module.
@@ -120,9 +122,22 @@ module TDX
     end
 
     def issues(commits)
-      dates = []
-      # dates = github.issues.map{ |i| i.created_at }
-      commits.map { |sha, date| [sha, dates.select { |d| d < date }.size] }.to_h
+      dates = if @uri.start_with?('git@')
+        client = if @opts[:login]
+          Octokit::Client.new(login: @opts[:login], password: @opts[:password])
+        else
+          Octokit::Client.new
+        end
+        repo = @uri.gsub(/^git@github.com:|.git$/, '')
+        puts repo
+        client.list_issues(repo, state: :all).map(&:created_at)
+      else
+        []
+      end
+      commits.map do |sha, date|
+        iso = Time.parse(date)
+        [sha, dates.select { |d| d < iso }.size]
+      end.to_h
     end
   end
 end

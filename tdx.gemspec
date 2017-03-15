@@ -45,6 +45,7 @@ Gem::Specification.new do |s|
   s.rdoc_options = ['--charset=UTF-8']
   s.extra_rdoc_files = ['README.md', 'LICENSE.txt']
   s.add_runtime_dependency 'slop', '~>4.4.1'
+  s.add_runtime_dependency 'octokit', '~>4.6.2'
   s.add_development_dependency 'rake', '12.0.0'
   s.add_development_dependency 'cucumber', '1.3.17'
   s.add_development_dependency 'coveralls', '0.7.2'

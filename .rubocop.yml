@@ -9,4 +9,9 @@ Metrics/AbcSize:
   Max: 37
 Style/MultilineMethodCallIndentation:
   Enabled: false
-
+Style/IndentationWidth:
+  Enabled: false
+Style/ElseAlignment:
+  Enabled: false
+Lint/EndAlignment:
+  Enabled: false
