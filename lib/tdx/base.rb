@@ -121,13 +121,13 @@ module TDX
     def hoc(path)
       hoc = `cd "#{path}" && hoc`
       raise 'Failed to run hoc' unless $CHILD_STATUS.exitstatus == 0
-      hoc
+      hoc.strip
     end
 
     def tests(path)
       hoc = `cd "#{path}" && hoc`
       raise 'Failed to run hoc' unless $CHILD_STATUS.exitstatus == 0
-      hoc
+      hoc.strip
     end
 
     def issues(commits)
