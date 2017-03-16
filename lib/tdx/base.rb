@@ -45,25 +45,27 @@ module TDX
       raise "git version #{version} is too old, upgrade it to 2.0+" unless
         Gem::Version.new(version) >= Gem::Version.new('2.0')
       path = checkout
-      commits = Exec.new('git log "--pretty=format:%H %cI" --reverse', path)
-        .stdout.split(/\n/).map { |c| c.split(' ') }
+      commits = Exec.new(
+        'git log "--pretty=format:%H %cI" ' +
+        (@opts[:sha] ? @opts[:sha] : 'HEAD'),
+        path
+      ).stdout.split(/\n/).map { |c| c.split(' ') }
       issues = issues(commits)
-      puts "Date\t\t\tTest\tHoC\tFiles\tLoC\tIssues\tSHA"
-      metrics = commits.map do |sha, date|
-        Exec.new("git checkout --quiet #{sha}", path).stdout
-        {
-          date: date,
+      puts "Date\t\t\tTest\tHoC\tFiles\tLoC\tIssues\tSHA\tIdx"
+      metrics = commits.each_with_index.map do |c, i|
+        Exec.new("git checkout --quiet #{c[0]}", path).stdout
+        m = {
+          date: c[1],
           pure: pure(path),
           hoc: hoc(path),
           files: files(path),
           loc: loc(path),
-          issues: issues[sha],
-          sha: sha
+          issues: issues[c[0]],
+          sha: c[0]
         }
-      end
-      metrics.each do |m|
         puts "#{m[:date][0, 16]}\t#{m[:pure]}\t#{m[:hoc]}\t#{m[:files]}\t\
-#{m[:loc]}\t#{m[:issues]}\t#{m[:sha][0, 7]}"
+#{m[:loc]}\t#{m[:issues]}\t#{m[:sha][0, 7]}\t#{i}/#{commits.size}"
+        m
       end
       max = { pure: 0, hoc: 0, files: 0, loc: 0, issues: 0 }
       max = metrics.inject(max) do |m, t|
@@ -75,7 +77,11 @@ module TDX
           issues: [m[:issues], t[:issues], 1].max
         }
       end
-      dat = Tempfile.new('tdx')
+      dat = if @opts[:data]
+        File.new(@opts[:data], 'w+')
+      else
+        Tempfile.new('tdx')
+      end
       metrics.each do |m|
         dat << [
           m[:date],

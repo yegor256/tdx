@@ -6,7 +6,7 @@ Metrics/MethodLength:
 Metrics/ClassLength:
   Max: 150
 Metrics/AbcSize:
-  Max: 100
+  Max: 200
 Style/MultilineMethodCallIndentation:
   Enabled: false
 Style/IndentationWidth:

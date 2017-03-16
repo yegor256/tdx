@@ -55,12 +55,11 @@ class TestPDD < Minitest::Test
   end
 
   def test_real_github_repo
-    File.write(
-      '/tmp/a.svg',
+    assert(
       TDX::Base.new(
-        'https://github.com/yegor256/jare.git',
-        opts(['--tests', 'src/test/**/*'])
-      ).svg
+        'https://github.com/yegor256/empty.git',
+        opts(['--tests', 'src/test/**/*', '--sha', '7c7000d'])
+      ).svg.include?('<path ')
     )
   end
 
@@ -68,7 +67,8 @@ class TestPDD < Minitest::Test
 
   def opts(args)
     Slop.parse args do |o|
-      o.array '-t', '--tests', argument: :required
+      o.array '-t', '--tests'
+      o.string '--sha'
     end
   end
 end

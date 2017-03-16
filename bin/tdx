@@ -33,10 +33,12 @@ opts = Slop.parse(args, strict: true, help: true) do |o|
   o.bool '-h', '--help', 'Show usage summary'
   o.bool '-v', '--version', 'Show current version'
   o.array(
-    '--tests',
+    '-t', '--tests',
     'Comma-separated list of glob masks with test-related files',
     delimiter: ','
   )
+  o.string '-d', '--data', 'Path of .dat file for Gnuplot'
+  o.string '--sha', 'The SHA to start from'
   o.string '--login', 'GitHub login'
   o.string '--password', 'GitHub password'
 end
