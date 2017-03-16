@@ -95,7 +95,6 @@ module TDX
         'set xdata time',
         'set border lc rgb "gray"',
         'set style fill solid',
-        'set boxwidth 0.75 relative',
         'set timefmt "%Y-%m"',
         'set grid linecolor rgb "gray"',
         'set autoscale y',
@@ -103,7 +102,7 @@ module TDX
         'set ytics format "%.0fK" textcolor rgb "black"',
         'set y2tics format "%.0f" textcolor rgb "#DA6D1A"',
         'set autoscale y2',
-        'unset xtics',
+        'set xtics format ""',
         [
           "plot \"#{dat.path}\"",
           ' u 1:($2/1000) w l t "Code" lw 2 lc rgb "#2B7947"',
