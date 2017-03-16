@@ -88,23 +88,38 @@ module TDX
       svg = Tempfile.new('tdx')
       gpi = [
         "set output \"#{svg.path}\"",
-        'set terminal svg size 700, 260',
+        'set terminal svg size 720, 360',
+        'set lmargin 7',
+        'set rmargin 5',
         'set termoption font "monospace,10"',
         'set xdata time',
-        'set timefmt "%Y-%m"',
-        'set ytics format "%.0f" textcolor rgb "black"',
-        'set y2tics format "%.0f" textcolor rgb "orange"',
-        'set grid linecolor rgb "gray"',
-        'set xtics format "%b/%y" font "monospace,8" textcolor rgb "black"',
-        'set autoscale y',
-        'set autoscale y2',
+        'set border lc rgb "gray"',
         'set style fill solid',
         'set boxwidth 0.75 relative',
+        'set timefmt "%Y-%m"',
+        'set grid linecolor rgb "gray"',
+        'set autoscale y',
+        'set multiplot layout 2,1',
+        'set ytics format "%.0fK" textcolor rgb "black"',
+        'set y2tics format "%.0f" textcolor rgb "#DA6D1A"',
+        'set autoscale y2',
+        'unset xtics',
         [
-          "plot \"#{dat.path}\" u 1:2 w l t \"code\" lc rgb \"#81b341\"",
-          ', "" u 1:3 w l t "tests" lc rgb "red"',
-          ', "" u 1:4 w l t "Issues" lc rgb "orange" axes x1y2'
-        ].join(' ')
+          "plot \"#{dat.path}\"",
+          ' u 1:($2/1000) w l t "Code" lw 2 lc rgb "#2B7947"',
+          ', "" u 1:($3/1000) w l t "Tests" lw 2 lc rgb "#C80604"',
+          ', "" u 1:4 w l t "Issues" lc rgb "#DA6D1A" axes x1y2'
+        ].join(' '),
+        'unset y2tics',
+        'unset title',
+        'set tmargin 0',
+        'set xtics format "%b/%y" font "monospace,8" textcolor rgb "gray"',
+        'set ytics format "%.0f%%" textcolor rgb "#C80604"',
+        [
+          "plot \"#{dat.path}\"",
+          'u 1:(100*$3/($2+$3)) pt 7 ps 1 lc rgb "#C80604" notitle'
+        ].join(' '),
+        'unset multiplot'
       ]
       Exec.new("gnuplot -e '#{gpi.join('; ')}'").stdout
       FileUtils.rm_rf(path)

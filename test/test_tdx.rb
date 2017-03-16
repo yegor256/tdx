@@ -56,12 +56,13 @@ class TestPDD < Minitest::Test
   end
 
   def test_real_github_repo
-    assert(
-      TDX::Base.new(
-        'https://github.com/yegor256/empty.git',
-        opts(['--tests', 'src/test/**/*'])
-      ).svg.include?('<path ')
-    )
+    f = '/tmp/tdx.svg'
+    svg = TDX::Base.new(
+      'https://github.com/yegor256/empty.git',
+      opts(['--tests', 'src/test/**/*'])
+    ).svg
+    File.write(f, svg)
+    assert(svg.include?('<path '))
   end
 
   private
