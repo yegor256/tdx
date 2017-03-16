@@ -41,6 +41,7 @@ class TestPDD < Minitest::Test
         git config user.email yegor256@gmail.com
         git config user.name 'Mr. Tester'
         echo 'a = 1' > 1.rb && git add 1.rb && git commit -qam '1'
+        rm 1.rb
         echo '<?php b = 2' > 2.php && git add 2.php && git commit -qam '2'
         mkdir tests
         echo 'c = 3' > tests/3.py && git add tests/3.py && git commit -qam '3'
@@ -55,10 +56,19 @@ class TestPDD < Minitest::Test
   end
 
   def test_real_github_repo
+    skip
+    File.write(
+      '/tmp/takes.svg',
+      TDX::Base.new(
+        'https://github.com/yegor256/takes.git',
+        opts(['--tests', 'src/test/**/*'])
+      ).svg
+    )
+    skip
     assert(
       TDX::Base.new(
-        'https://github.com/yegor256/empty.git',
-        opts(['--tests', 'src/test/**/*', '--sha', '7c7000d'])
+        'https://github.com/yegor256/takes.git',
+        opts(['--tests', 'src/test/**/*'])
       ).svg.include?('<path ')
     )
   end

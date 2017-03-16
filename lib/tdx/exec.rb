@@ -36,12 +36,12 @@ module TDX
     def initialize(cmd, dir = '.')
       @cmd = cmd
       @dir = dir
-      @log = false
+      @log = ENV['RACK_ENV'] == 'test'
     end
 
     def stdout
       puts "+ #{@cmd}" if @log
-      out = `cd #{@dir} && #{@cmd} 2>/dev/null`
+      out = `cd #{@dir} && #{@cmd}`
       raise "This one failed: #{@cmd}" unless $CHILD_STATUS.exitstatus == 0
       puts out if @log
       out

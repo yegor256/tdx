@@ -24,4 +24,6 @@ require 'simplecov'
 require 'tdx'
 require 'minitest/autorun'
 
+ENV['RACK_ENV'] = 'test'
+
 STDOUT.sync = true

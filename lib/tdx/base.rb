@@ -53,31 +53,20 @@ module TDX
         (@opts[:sha] ? @opts[:sha] : 'HEAD'),
         path
       ).stdout.split(/\n/).map { |c| c.split(' ') }
-      puts "Date\t\t\tTest\tHoC\tFiles\tLoC\tIssues\tSHA\tIdx"
+      puts "Date\t\t\tCode\tTests\tIssues\tSHA\tIdx"
       metrics = commits.each_with_index.map do |c, i|
-        Exec.new("git checkout --quiet #{c[0]}", path).stdout
+        Exec.new("git checkout --quiet --force #{c[0]}", path).stdout
+        pure = pure(path, c[0])
         m = {
           date: c[1],
-          pure: pure(path, c[0]),
-          hoc: hoc(path, c[0]),
-          files: files(path),
-          loc: loc(path),
+          code: pure,
+          tests: hoc(path, c[0]) - pure,
           issues: issues(commits)[c[0]],
           sha: c[0]
         }
-        puts "#{m[:date][0, 16]}\t#{m[:pure]}\t#{m[:hoc]}\t#{m[:files]}\t\
-#{m[:loc]}\t#{m[:issues]}\t#{m[:sha][0, 7]}\t#{i}/#{commits.size}"
+        puts "#{m[:date][0, 16]}\t#{m[:code]}\t#{m[:tests]}\t\
+#{m[:issues]}\t#{m[:sha][0, 7]}\t#{i}/#{commits.size}"
         m
-      end
-      max = { pure: 0, hoc: 0, files: 0, loc: 0, issues: 0 }
-      max = metrics.inject(max) do |m, t|
-        {
-          pure: [m[:pure], t[:pure], 1].max,
-          hoc: [m[:hoc], t[:hoc], 1].max,
-          files: [m[:files], t[:files], 1].max,
-          loc: [m[:loc], t[:loc], 1].max,
-          issues: [m[:issues], t[:issues], 1].max
-        }
       end
       dat = if @opts[:data]
         File.new(@opts[:data], 'w+')
@@ -87,12 +76,9 @@ module TDX
       metrics.each do |m|
         dat << [
           m[:date],
-          100.0 * m[:pure] / max[:pure],
-          100.0 * (m[:pure] - m[:hoc]) / (max[:pure] - max[:hoc]),
-          100.0 * m[:hoc] / max[:hoc],
-          100.0 * m[:files] / max[:files],
-          100.0 * m[:loc] / max[:loc],
-          100.0 * m[:issues] / max[:issues],
+          m[:code],
+          m[:tests],
+          m[:issues],
           m[:sha]
         ].join(' ') + "\n"
       end
@@ -104,17 +90,16 @@ module TDX
         'set termoption font "monospace,10"',
         'set xdata time',
         'set timefmt "%Y-%m"',
-        'set ytics format "%.0f%%" textcolor rgb "black"',
+        'set ytics format "%.0f" textcolor rgb "black"',
         'set grid linecolor rgb "gray"',
         'set xtics format "%b/%y" font "monospace,8" textcolor rgb "black"',
-        'set autoscale',
+        'set autoscale y',
         'set style fill solid',
         'set boxwidth 0.75 relative',
         [
-          "plot \"#{dat.path}\" using 1:3 with lines",
-          'title "Test HoC" linecolor rgb "#81b341"',
-          ', "" using 1:4 with lines title "HoC" linecolor rgb "red"',
-          ', "" using 1:7 with lines title "Issues" linecolor rgb "orange"'
+          "plot \"#{dat.path}\" u 1:2 w l t \"code\" lc rgb \"#81b341\"",
+          ', "" u 1:3 w l t "tests" lc rgb "red"',
+          ', "" u 1:4 w l t "Issues" lc rgb "orange"'
         ].join(' ')
       ]
       Exec.new("gnuplot -e '#{gpi.join('; ')}'").stdout
@@ -130,20 +115,9 @@ module TDX
     def checkout
       dir = Dir.mktmpdir
       Exec.new("git clone --quiet #{@uri} .", dir).stdout
-      size = Dir.glob(File.join(dir, '**/*'))
-        .map(&:size)
-        .inject(0) { |a, e| a + e }
+      size = Dir.glob(File.join(dir, '**', '*')).map(&:size).inject(:+)
       puts "Cloned #{@uri} (#{size / 1024}Kb) into temporary directory"
       dir
-    end
-
-    def files(path)
-      Dir.glob("#{path}/**/*").size
-    end
-
-    def loc(path)
-      Nokogiri::XML.parse(Exec.new('cloc . --xml --quiet', path).stdout)
-        .xpath('/results/languages/total/@code')[0].to_s.to_i
     end
 
     def pure(path, sha)
@@ -163,13 +137,13 @@ module TDX
 -M --diff-filter=ACDM -- . ' +
 excludes.map { |e| "':(exclude,glob)#{e}'" }.join(' '),
         path
-      ).stdout.scan(/[0-9a-f]{40}\n\n.+?/m).map do |t|
+      ).stdout.split(/(?=[0-9a-f]{40})/m).map do |t|
         lines = t.split("\n")
         [
           lines[0],
           lines.drop(2).map do |n|
-            n.split(/\t/).take(2).map(&:to_i).inject(:+)
-          end.inject(:+)
+            n.split(/\s+/).take(2).map(&:to_i).inject(:+)
+          end.inject(:+) || 0
         ]
       end
     end
@@ -191,7 +165,16 @@ excludes.map { |e| "':(exclude,glob)#{e}'" }.join(' '),
         else
           @uri.gsub(%r{^https://github\.com/|\.git$}, '')
         end
-        list = client.list_issues(repo, state: :all).map(&:created_at)
+        list = []
+        p = 1
+        loop do
+          page = client.list_issues(
+            repo, state: 'all', page: p
+          ).map(&:created_at)
+          break if page.empty?
+          list.concat(page)
+          p += 1
+        end
         puts "Loaded #{list.length} issues from GitHub repo '#{repo}'"
         list
       else
