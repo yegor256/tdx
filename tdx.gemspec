@@ -51,7 +51,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'cucumber', '1.3.17'
   s.add_development_dependency 'coveralls', '0.7.2'
   s.add_development_dependency 'rubocop', '0.41.2'
-  s.add_development_dependency 'hoc', '0.8'
   s.add_development_dependency 'rubocop-rspec', '1.5.1'
   s.add_development_dependency 'minitest', '5.10.1'
 end

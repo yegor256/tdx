@@ -36,11 +36,14 @@ module TDX
     def initialize(cmd, dir = '.')
       @cmd = cmd
       @dir = dir
+      @log = false
     end
 
     def stdout
+      puts "+ #{@cmd}" if @log
       out = `cd #{@dir} && #{@cmd} 2>/dev/null`
       raise "This one failed: #{@cmd}" unless $CHILD_STATUS.exitstatus == 0
+      puts out if @log
       out
     end
   end

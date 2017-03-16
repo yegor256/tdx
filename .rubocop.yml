@@ -4,9 +4,12 @@ AllCops:
 Metrics/MethodLength:
   Max: 150
 Metrics/ClassLength:
-  Max: 150
+  Max: 300
 Metrics/AbcSize:
   Max: 200
+Metrics/PerceivedComplexity:
+  Max: 10
+
 Style/MultilineMethodCallIndentation:
   Enabled: false
 Style/IndentationWidth:

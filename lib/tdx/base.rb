@@ -38,6 +38,9 @@ module TDX
     def initialize(uri, opts)
       @uri = uri
       @opts = opts
+      @issues = nil
+      @pure = nil
+      @hoc = nil
     end
 
     def svg
@@ -50,17 +53,16 @@ module TDX
         (@opts[:sha] ? @opts[:sha] : 'HEAD'),
         path
       ).stdout.split(/\n/).map { |c| c.split(' ') }
-      issues = issues(commits)
       puts "Date\t\t\tTest\tHoC\tFiles\tLoC\tIssues\tSHA\tIdx"
       metrics = commits.each_with_index.map do |c, i|
         Exec.new("git checkout --quiet #{c[0]}", path).stdout
         m = {
           date: c[1],
-          pure: pure(path),
-          hoc: hoc(path),
+          pure: pure(path, c[0]),
+          hoc: hoc(path, c[0]),
           files: files(path),
           loc: loc(path),
-          issues: issues[c[0]],
+          issues: issues(commits)[c[0]],
           sha: c[0]
         }
         puts "#{m[:date][0, 16]}\t#{m[:pure]}\t#{m[:hoc]}\t#{m[:files]}\t\
@@ -144,23 +146,40 @@ module TDX
         .xpath('/results/languages/total/@code')[0].to_s.to_i
     end
 
-    def pure(path)
-      exclude = if @opts[:tests]
-        @opts[:tests].map { |e| "--exclude=#{e}" }
-      else
-        []
-      end
-      Exec.new(
-        'hoc ' + exclude.join(' '),
-        path
-      ).stdout.strip.to_i
+    def pure(path, sha)
+      @pure = hashes(path, @opts[:tests]) if @pure.nil?
+      sum(@pure, sha)
     end
 
-    def hoc(path)
-      Exec.new('hoc', path).stdout.strip.to_i
+    def hoc(path, sha)
+      @hoc = hashes(path, []) if @hoc.nil?
+      sum(@hoc, sha)
+    end
+
+    def hashes(path, excludes)
+      Exec.new(
+        'git log --pretty=tformat:%H --numstat --ignore-space-change \
+--ignore-all-space --ignore-submodules --no-color --find-copies-harder \
+-M --diff-filter=ACDM -- . ' +
+excludes.map { |e| "':(exclude,glob)#{e}'" }.join(' '),
+        path
+      ).stdout.scan(/[0-9a-f]{40}\n\n.+?/m).map do |t|
+        lines = t.split("\n")
+        [
+          lines[0],
+          lines.drop(2).map do |n|
+            n.split(/\t/).take(2).map(&:to_i).inject(:+)
+          end.inject(:+)
+        ]
+      end
+    end
+
+    def sum(hashes, sha)
+      hashes.drop_while { |c| c[0] != sha }.map { |c| c[1] }.inject(:+) || 0
     end
 
     def issues(commits)
+      return @issues unless @issues.nil?
       dates = if @uri.include?('github.com')
         client = if @opts[:login]
           Octokit::Client.new(login: @opts[:login], password: @opts[:password])
@@ -178,7 +197,7 @@ module TDX
       else
         []
       end
-      commits.map do |sha, date|
+      @issues = commits.map do |sha, date|
         iso = Time.parse(date)
         [sha, dates.select { |d| d < iso }.size]
       end.to_h

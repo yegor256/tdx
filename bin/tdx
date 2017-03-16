@@ -35,7 +35,7 @@ opts = Slop.parse(args, strict: true, help: true) do |o|
   o.array(
     '-t', '--tests',
     'Comma-separated list of glob masks with test-related files',
-    delimiter: ','
+    delimiter: ',', default: []
   )
   o.string '-d', '--data', 'Path of .dat file for Gnuplot'
   o.string '--sha', 'The SHA to start from'
