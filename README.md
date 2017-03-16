@@ -33,6 +33,12 @@ Run it locally and read its output:
 $ tdx --help
 ```
 
+This command, for example, will generate SVG graph for this repo:
+
+```bash
+$ tdx --tests=test/**/* --tests=features/**/* git@github.com:yegor256/tdx.git graph.svg
+```
+
 ## How to contribute
 
 Just fork it and submit a pull request. Make sure `rake` passes.
