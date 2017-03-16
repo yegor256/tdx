@@ -36,7 +36,7 @@ module TDX
     def initialize(cmd, dir = '.')
       @cmd = cmd
       @dir = dir
-      @log = ENV['RACK_ENV'] == 'test'
+      @log = false
     end
 
     def stdout

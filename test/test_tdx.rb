@@ -56,18 +56,9 @@ class TestPDD < Minitest::Test
   end
 
   def test_real_github_repo
-    skip
-    File.write(
-      '/tmp/takes.svg',
-      TDX::Base.new(
-        'https://github.com/yegor256/takes.git',
-        opts(['--tests', 'src/test/**/*'])
-      ).svg
-    )
-    skip
     assert(
       TDX::Base.new(
-        'https://github.com/yegor256/takes.git',
+        'https://github.com/yegor256/empty.git',
         opts(['--tests', 'src/test/**/*'])
       ).svg.include?('<path ')
     )

@@ -41,6 +41,8 @@ module TDX
       @issues = nil
       @pure = nil
       @hoc = nil
+      @logopts = '--ignore-space-change --no-color --find-copies-harder \
+--ignore-all-space --ignore-submodules -M --diff-filter=ACDM'
     end
 
     def svg
@@ -49,7 +51,7 @@ module TDX
         Gem::Version.new(version) >= Gem::Version.new('2.0')
       path = checkout
       commits = Exec.new(
-        'git log "--pretty=format:%H %cI" ' +
+        "git log '--pretty=format:%H %cI' #{@logopts} " +
         (@opts[:sha] ? @opts[:sha] : 'HEAD'),
         path
       ).stdout.split(/\n/).map { |c| c.split(' ') }
@@ -73,7 +75,7 @@ module TDX
       else
         Tempfile.new('tdx')
       end
-      metrics.each do |m|
+      metrics.select { |m| m[:code] > 0 }.each do |m|
         dat << [
           m[:date],
           m[:code],
@@ -91,15 +93,17 @@ module TDX
         'set xdata time',
         'set timefmt "%Y-%m"',
         'set ytics format "%.0f" textcolor rgb "black"',
+        'set y2tics format "%.0f" textcolor rgb "orange"',
         'set grid linecolor rgb "gray"',
         'set xtics format "%b/%y" font "monospace,8" textcolor rgb "black"',
         'set autoscale y',
+        'set autoscale y2',
         'set style fill solid',
         'set boxwidth 0.75 relative',
         [
           "plot \"#{dat.path}\" u 1:2 w l t \"code\" lc rgb \"#81b341\"",
           ', "" u 1:3 w l t "tests" lc rgb "red"',
-          ', "" u 1:4 w l t "Issues" lc rgb "orange"'
+          ', "" u 1:4 w l t "Issues" lc rgb "orange" axes x1y2'
         ].join(' ')
       ]
       Exec.new("gnuplot -e '#{gpi.join('; ')}'").stdout
@@ -132,9 +136,7 @@ module TDX
 
     def hashes(path, excludes)
       Exec.new(
-        'git log --pretty=tformat:%H --numstat --ignore-space-change \
---ignore-all-space --ignore-submodules --no-color --find-copies-harder \
--M --diff-filter=ACDM -- . ' +
+        "git log --pretty=tformat:%H --numstat #{@logopts} -- . " +
 excludes.map { |e| "':(exclude,glob)#{e}'" }.join(' '),
         path
       ).stdout.split(/(?=[0-9a-f]{40})/m).map do |t|
@@ -173,6 +175,7 @@ excludes.map { |e| "':(exclude,glob)#{e}'" }.join(' '),
           ).map(&:created_at)
           break if page.empty?
           list.concat(page)
+          puts "+#{page.length}/#{list.size} issues from GitHub"
           p += 1
         end
         puts "Loaded #{list.length} issues from GitHub repo '#{repo}'"
