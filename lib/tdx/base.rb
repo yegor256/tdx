@@ -59,10 +59,11 @@ module TDX
       metrics = commits.each_with_index.map do |c, i|
         Exec.new("git checkout --quiet --force #{c[0]}", path).stdout
         pure = pure(path, c[0])
+        total = hoc(path, c[0])
         m = {
           date: c[1],
           code: pure,
-          tests: hoc(path, c[0]) - pure,
+          tests: pure > total ? total : total - pure,
           issues: issues(commits)[c[0]],
           sha: c[0]
         }
@@ -139,12 +140,18 @@ module TDX
     end
 
     def pure(path, sha)
-      @pure = hashes(path, @opts[:tests]) if @pure.nil?
+      if @pure.nil?
+        @pure = hashes(path, @opts[:tests])
+        puts "#{@pure.length} code commits"
+      end
       sum(@pure, sha)
     end
 
     def hoc(path, sha)
-      @hoc = hashes(path, []) if @hoc.nil?
+      if @hoc.nil?
+        @hoc = hashes(path, [])
+        puts "#{@hoc.length} total commits"
+      end
       sum(@hoc, sha)
     end
 
