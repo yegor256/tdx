@@ -10,7 +10,9 @@
 
 ## What This is for?
 
-I will tell you later...
+It's a simple command line tool to calculate your automated testing dynamics.
+More about it here:
+[The TDD That Works for Me](http://www.yegor256.com/2017/03/24/tdd-that-works.html).
 
 ## How to Install?
 
