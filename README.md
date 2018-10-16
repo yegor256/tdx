@@ -41,9 +41,19 @@ This command, for example, will generate SVG graph for this repo:
 $ tdx --tests=test/**/* --tests=features/**/* git@github.com:yegor256/tdx.git graph.svg
 ```
 
-## How to contribute
+# How to contribute
 
-Just fork it and submit a pull request. Make sure `rake` passes.
+Read [these guidelines](https://www.yegor256.com/2014/04/15/github-guidelines.html).
+Make sure you build is green before you contribute
+your pull request. You will need to have [Ruby](https://www.ruby-lang.org/en/) 2.3+ and
+[Bundler](https://bundler.io/) installed. Then:
+
+```
+$ bundle update
+$ rake
+```
+
+If it's clean and you don't see any error messages, submit your pull request.
 
 ## LICENSE
 
