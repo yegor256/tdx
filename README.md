@@ -1,12 +1,10 @@
-[![DevOps By Rultor.com](http://www.rultor.com/b/yegor256/tdx)](http://www.rultor.com/p/yegor256/tdx)
-[![We recommend RubyMine](http://img.teamed.io/rubymine-recommend.svg)](https://www.jetbrains.com/ruby/)
+[![DevOps By Rultor.com](https://www.rultor.com/b/yegor256/tdx)](https://www.rultor.com/p/yegor256/tdx)
+[![We recommend RubyMine](https://www.elegantobjects.org/rubymine.svg)](https://www.jetbrains.com/ruby/)
 
-[![Build Status](https://travis-ci.org/yegor256/tdx.svg)](https://travis-ci.org/yegor256/tdx)
-[![PDD status](http://www.0pdd.com/svg?name=yegor256/tdx)](http://www.0pdd.com/p?name=yegor256/tdx)
-[![Gem Version](https://badge.fury.io/rb/tdx.svg)](http://badge.fury.io/rb/tdx)
-[![Dependency Status](https://gemnasium.com/yegor256/tdx.svg)](https://gemnasium.com/yegor256/tdx)
-[![Code Climate](http://img.shields.io/codeclimate/github/yegor256/tdx.svg)](https://codeclimate.com/github/yegor256/tdx)
-[![Coverage Status](https://img.shields.io/coveralls/yegor256/tdx.svg)](https://coveralls.io/r/yegor256/tdx)
+[![rake](https://github.com/yegor256/tdx/actions/workflows/rake.yml/badge.svg)](https://github.com/yegor256/tdx/actions/workflows/rake.yml)
+[![PDD status](https://www.0pdd.com/svg?name=yegor256/tdx)](https://www.0pdd.com/p?name=yegor256/tdx)
+[![Gem Version](https://badge.fury.io/rb/tdx.svg)](https://badge.fury.io/rb/tdx)
+[![Maintainability](https://api.codeclimate.com/v1/badges/plakias/maintainability)](https://codeclimate.com/github/yegor256/tdx/maintainability)
 
 ## What This is for?
 
@@ -44,8 +42,8 @@ $ tdx --tests=test/**/* --tests=features/**/* git@github.com:yegor256/tdx.git gr
 # How to contribute
 
 Read [these guidelines](https://www.yegor256.com/2014/04/15/github-guidelines.html).
-Make sure you build is green before you contribute
-your pull request. You will need to have [Ruby](https://www.ruby-lang.org/en/) 2.3+ and
+Make sure your build is green before you contribute
+your pull request. You will need to have [Ruby](https://www.ruby-lang.org/en/) 3.0+ and
 [Bundler](https://bundler.io/) installed. Then:
 
 ```
@@ -59,7 +57,7 @@ If it's clean and you don't see any error messages, submit your pull request.
 
 (The MIT License)
 
-Copyright (c) 2017 Yegor Bugayenko
+Copyright (c) 2017-2026 Yegor Bugayenko
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the 'Software'), to deal

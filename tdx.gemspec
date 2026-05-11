@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 # Copyright (c) 2017 Yegor Bugayenko
 #
@@ -20,17 +19,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-lib = File.expand_path('../lib', __FILE__)
+lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'tdx/version'
 
 Gem::Specification.new do |s|
-  s.specification_version = 2 if s.respond_to? :specification_version=
-  if s.respond_to? :required_rubygems_version=
-    s.required_rubygems_version = Gem::Requirement.new('>= 0')
-  end
-  s.rubygems_version = '2.2.2'
-  s.required_ruby_version = '>= 1.9.3'
+  s.required_rubygems_version = Gem::Requirement.new('>= 0') if s.respond_to? :required_rubygems_version=
+  s.required_ruby_version = '>=3.0'
   s.name = 'tdx'
   s.version = TDX::VERSION
   s.license = 'MIT'
@@ -41,16 +36,11 @@ Gem::Specification.new do |s|
   s.homepage = 'http://github.com/yegor256/tdx'
   s.files = `git ls-files`.split($RS)
   s.executables = s.files.grep(%r{^bin/}) { |f| File.basename(f) }
-  s.test_files = s.files.grep(%r{^(test|spec|features)/})
   s.rdoc_options = ['--charset=UTF-8']
   s.extra_rdoc_files = ['README.md', 'LICENSE.txt']
-  s.add_runtime_dependency 'slop', '~>4.4.1'
-  s.add_runtime_dependency 'octokit', '~>4.6.2'
-  s.add_runtime_dependency 'nokogiri', '1.7.0.1'
-  s.add_development_dependency 'rake', '12.0.0'
-  s.add_development_dependency 'cucumber', '1.3.17'
-  s.add_development_dependency 'coveralls', '0.7.2'
-  s.add_development_dependency 'rubocop', '0.41.2'
-  s.add_development_dependency 'rubocop-rspec', '1.5.1'
-  s.add_development_dependency 'minitest', '5.10.1'
+  s.add_dependency 'faraday-retry', '~>2.2'
+  s.add_dependency 'nokogiri', '~>1.16'
+  s.add_dependency 'octokit', '~>9.0'
+  s.add_dependency 'slop', '~>4.10'
+  s.metadata['rubygems_mfa_required'] = 'true'
 end

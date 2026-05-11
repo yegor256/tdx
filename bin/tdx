@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# encoding: utf-8
+
 #
 # Copyright (c) 2017 Yegor Bugayenko
 #
@@ -21,14 +21,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-STDOUT.sync = true
+$stdout.sync = true
 
 require 'slop'
 require 'tdx'
 
 args = ARGV
 
-opts = Slop.parse(args, strict: true, help: true) do |o|
+opts = Slop.parse(args, suppress_errors: false) do |o|
   o.banner = "Usage (#{TDX::VERSION}): tdx [options] <GitHub URI> <SVG path>"
   o.bool '-h', '--help', 'Show usage summary'
   o.bool '-v', '--version', 'Show current version'
@@ -39,8 +39,9 @@ opts = Slop.parse(args, strict: true, help: true) do |o|
   )
   o.string '-d', '--data', 'Path of .dat file for Gnuplot'
   o.string '--sha', 'The SHA to start from'
-  o.string '--login', 'GitHub login'
-  o.string '--password', 'GitHub password'
+  o.string '--login', 'GitHub login (legacy)'
+  o.string '--password', 'GitHub password (legacy)'
+  o.string '--token', 'GitHub personal access token'
 end
 
 if opts.help?
