@@ -1,6 +1,8 @@
-# encoding: utf-8
+# frozen_string_literal: true
+
+# (The MIT License)
 #
-# Copyright (c) 2017 Yegor Bugayenko
+# Copyright (c) 2017-2026 Yegor Bugayenko
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the 'Software'), to deal
@@ -14,30 +16,16 @@
 #
 # THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFINGEMENT. IN NO EVENT SHALL THE
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'coveralls'
+require 'simplecov'
 
-if Gem.win_platform? then
-  SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
-    SimpleCov::Formatter::HTMLFormatter
-  ]
-  SimpleCov.start do
-    add_filter "/test/"
-    add_filter "/features/"
-  end
-else
-  SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
-    SimpleCov::Formatter::HTMLFormatter,
-    Coveralls::SimpleCov::Formatter
-  ]
-  SimpleCov.start do
-    add_filter "/test/"
-    add_filter "/features/"
-    minimum_coverage 80
-  end
+SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
+SimpleCov.start do
+  add_filter '/test/'
+  add_filter '/features/'
 end

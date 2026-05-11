@@ -1,6 +1,8 @@
-# encoding: utf-8
+# frozen_string_literal: true
+
+# (The MIT License)
 #
-# Copyright (c) 2017 Yegor Bugayenko
+# Copyright (c) 2017-2026 Yegor Bugayenko
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the 'Software'), to deal
@@ -22,3 +24,13 @@
 
 source 'https://rubygems.org'
 gemspec
+
+gem 'cucumber', '~>9.2', require: false
+gem 'minitest', '~>5.22', require: false
+gem 'rake', '~>13.2', require: false
+gem 'rdoc', '~>6.7', require: false
+gem 'rubocop', '~>1.63', require: false
+gem 'rubocop-minitest', '>0', require: false
+gem 'rubocop-performance', '>0', require: false
+gem 'rubocop-rake', '>0', require: false
+gem 'simplecov', '~>0.22', require: false

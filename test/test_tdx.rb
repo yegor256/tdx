@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 # Copyright (c) 2017 Yegor Bugayenko
 #
@@ -46,23 +45,27 @@ class TestPDD < Minitest::Test
         mkdir tests
         echo 'c = 3' > tests/3.py && git add tests/3.py && git commit -qam '3'
       ")
-      assert(
+
+      assert_includes(
         TDX::Base.new(
           "file:///#{File.join(dir, 'repo')}",
           opts(['--tests', 'tests/**/*'])
-        ).svg.include?('<path ')
+        ).svg, '<path '
       )
     end
   end
 
   def test_real_github_repo
-    f = '/tmp/tdx.svg'
+    skip 'Set GITHUB_TOKEN to run this test' if ENV['GITHUB_TOKEN'].to_s.empty?
+    f = File.join(Dir.tmpdir, 'tdx.svg')
+    args = ['--tests', 'src/test/**/*', '--token', ENV.fetch('GITHUB_TOKEN', nil)]
     svg = TDX::Base.new(
       'https://github.com/yegor256/empty.git',
-      opts(['--tests', 'src/test/**/*'])
+      opts(args)
     ).svg
     File.write(f, svg)
-    assert(svg.include?('<path '))
+
+    assert_includes(svg, '<path ')
   end
 
   private
@@ -71,6 +74,9 @@ class TestPDD < Minitest::Test
     Slop.parse args do |o|
       o.array '-t', '--tests'
       o.string '--sha'
+      o.string '--login'
+      o.string '--password'
+      o.string '--token'
     end
   end
 end

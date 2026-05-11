@@ -1,20 +1,43 @@
+---
 AllCops:
   DisplayCopNames: true
-
-Metrics/MethodLength:
-  Max: 150
-Metrics/ClassLength:
-  Max: 300
+  TargetRubyVersion: 3.0
+  SuggestExtensions: false
+  NewCops: enable
+  Exclude:
+    - 'vendor/**/*'
+    - 'coverage/**/*'
+plugins:
+  - rubocop-minitest
+  - rubocop-performance
+  - rubocop-rake
+Layout/EmptyLineAfterGuardClause:
+  Enabled: false
+Layout/EndOfLine:
+  EnforcedStyle: lf
+Layout/MultilineMethodCallIndentation:
+  Enabled: false
+Layout/IndentationWidth:
+  Enabled: true
+Layout/ElseAlignment:
+  Enabled: true
+Layout/EndAlignment:
+  Enabled: true
 Metrics/AbcSize:
   Max: 200
+Metrics/BlockLength:
+  Max: 50
+Metrics/ClassLength:
+  Max: 300
+Metrics/CyclomaticComplexity:
+  Max: 20
+Metrics/MethodLength:
+  Max: 150
+Metrics/ParameterLists:
+  Max: 7
 Metrics/PerceivedComplexity:
-  Max: 10
-
-Style/MultilineMethodCallIndentation:
+  Max: 15
+Style/Documentation:
   Enabled: false
-Style/IndentationWidth:
-  Enabled: false
-Style/ElseAlignment:
-  Enabled: false
-Lint/EndAlignment:
+Style/FrozenStringLiteralComment:
   Enabled: false

@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 # Copyright (c) 2017 Yegor Bugayenko
 #
@@ -22,9 +21,12 @@
 
 require 'date'
 require 'yaml'
+require 'faraday/retry'
 require 'octokit'
 require 'fileutils'
 require 'nokogiri'
+require 'tempfile'
+require 'tmpdir'
 require 'English'
 require 'tdx/exec'
 
@@ -52,9 +54,9 @@ module TDX
       path = checkout
       commits = Exec.new(
         "git log '--pretty=format:%H %cI' #{@logopts} " +
-        (@opts[:sha] ? @opts[:sha] : 'HEAD'),
+        (@opts[:sha] || 'HEAD'),
         path
-      ).stdout.split(/\n/).map { |c| c.split(' ') }
+      ).stdout.split("\n").map(&:split)
       puts "Date\t\t\tCode\tTests\tIssues\tSHA\tIdx"
       metrics = commits.each_with_index.map do |c, i|
         Exec.new("git checkout --quiet --force #{c[0]}", path).stdout
@@ -72,18 +74,12 @@ module TDX
         m
       end
       dat = if @opts[:data]
-        File.new(@opts[:data], 'w+')
-      else
-        Tempfile.new('tdx')
-      end
-      metrics.select { |m| m[:code] > 0 }.each do |m|
-        dat << [
-          m[:date],
-          m[:code],
-          m[:tests],
-          m[:issues],
-          m[:sha]
-        ].join(' ') + "\n"
+              File.new(@opts[:data], 'w+')
+            else
+              Tempfile.new('tdx')
+            end
+      metrics.select { |m| m[:code].positive? }.each do |m|
+        dat << "#{[m[:date], m[:code], m[:tests], m[:issues], m[:sha]].join(' ')}\n"
       end
       dat.close
       svg = Tempfile.new('tdx')
@@ -134,7 +130,7 @@ module TDX
     def checkout
       dir = Dir.mktmpdir
       Exec.new("git clone --quiet #{@uri} .", dir).stdout
-      size = Dir.glob(File.join(dir, '**', '*')).map(&:size).inject(:+)
+      size = Dir.glob(File.join(dir, '**', '*')).sum(&:size)
       puts "Cloned #{@uri} (#{size / 1024}Kb) into temporary directory"
       dir
     end
@@ -164,50 +160,53 @@ excludes.map { |e| "':(exclude,glob)#{e}'" }.join(' '),
         lines = t.split("\n")
         [
           lines[0],
-          lines.drop(2).map do |n|
-            n.split(/\s+/).take(2).map(&:to_i).inject(:+)
-          end.inject(:+) || 0
+          lines.drop(2).sum do |n|
+            n.split(/\s+/).take(2).sum(&:to_i)
+          end || 0
         ]
       end
     end
 
     def sum(hashes, sha)
-      hashes.drop_while { |c| c[0] != sha }.map { |c| c[1] }.inject(:+) || 0
+      hashes.drop_while { |c| c[0] != sha }.sum { |c| c[1] } || 0
     end
 
     def issues(commits)
       return @issues unless @issues.nil?
       dates = if @uri.include?('github.com')
-        client = if @opts[:login]
-          Octokit::Client.new(login: @opts[:login], password: @opts[:password])
-        else
-          Octokit::Client.new
-        end
-        repo = if @uri.start_with?('git@')
-          @uri.gsub(/^git@github\.com:|\.git$/, '')
-        else
-          @uri.gsub(%r{^https://github\.com/|\.git$}, '')
-        end
-        list = []
-        p = 1
-        loop do
-          page = client.list_issues(
-            repo, state: 'all', page: p
-          ).map(&:created_at)
-          break if page.empty?
-          list.concat(page)
-          puts "+#{page.length}/#{list.size} issues from GitHub"
-          p += 1
-        end
-        puts "Loaded #{list.length} issues from GitHub repo '#{repo}'"
-        list
-      else
-        []
-      end
-      @issues = commits.map do |sha, date|
+                client =
+                  if @opts[:token]
+                    Octokit::Client.new(access_token: @opts[:token])
+                  elsif @opts[:login]
+                    Octokit::Client.new(login: @opts[:login], password: @opts[:password])
+                  else
+                    Octokit::Client.new
+                  end
+                repo = if @uri.start_with?('git@')
+                         @uri.gsub(/^git@github\.com:|\.git$/, '')
+                       else
+                         @uri.gsub(%r{^https://github\.com/|\.git$}, '')
+                       end
+                list = []
+                p = 1
+                loop do
+                  page = client.list_issues(
+                    repo, state: 'all', page: p
+                  ).map(&:created_at)
+                  break if page.empty?
+                  list.concat(page)
+                  puts "+#{page.length}/#{list.size} issues from GitHub"
+                  p += 1
+                end
+                puts "Loaded #{list.length} issues from GitHub repo '#{repo}'"
+                list
+              else
+                []
+              end
+      @issues = commits.to_h do |sha, date|
         iso = Time.parse(date)
-        [sha, dates.select { |d| d < iso }.size]
-      end.to_h
+        [sha, dates.count { |d| d < iso }]
+      end
     end
   end
 end
