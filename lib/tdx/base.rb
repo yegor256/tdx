@@ -1,4 +1,5 @@
-# encoding: utf-8
+# frozen_string_literal: true
+
 #
 # Copyright (c) 2017 Yegor Bugayenko
 #
@@ -21,7 +22,10 @@
 # SOFTWARE.
 
 require 'date'
+require 'tmpdir'
+require 'tempfile'
 require 'yaml'
+require 'faraday/retry'
 require 'octokit'
 require 'fileutils'
 require 'nokogiri'
@@ -49,12 +53,13 @@ module TDX
       version = Exec.new('git --version').stdout.split(/ /)[2]
       raise "git version #{version} is too old, upgrade it to 2.0+" unless
         Gem::Version.new(version) >= Gem::Version.new('2.0')
+
       path = checkout
       commits = Exec.new(
         "git log '--pretty=format:%H %cI' #{@logopts} " +
-        (@opts[:sha] ? @opts[:sha] : 'HEAD'),
+        (@opts[:sha] || 'HEAD'),
         path
-      ).stdout.split(/\n/).map { |c| c.split(' ') }
+      ).stdout.split("\n").map(&:split)
       puts "Date\t\t\tCode\tTests\tIssues\tSHA\tIdx"
       metrics = commits.each_with_index.map do |c, i|
         Exec.new("git checkout --quiet --force #{c[0]}", path).stdout
@@ -71,21 +76,7 @@ module TDX
 #{m[:issues]}\t#{m[:sha][0, 7]}\t#{i}/#{commits.size}"
         m
       end
-      dat = if @opts[:data]
-        File.new(@opts[:data], 'w+')
-      else
-        Tempfile.new('tdx')
-      end
-      metrics.select { |m| m[:code] > 0 }.each do |m|
-        dat << [
-          m[:date],
-          m[:code],
-          m[:tests],
-          m[:issues],
-          m[:sha]
-        ].join(' ') + "\n"
-      end
-      dat.close
+      dat = data_file(metrics)
       svg = Tempfile.new('tdx')
       gpi = [
         "set output \"#{svg.path}\"",
@@ -131,6 +122,19 @@ module TDX
 
     private
 
+    def data_file(metrics)
+      dat = if @opts[:data]
+        File.new(@opts[:data], 'w+')
+      else
+        Tempfile.new('tdx')
+      end
+      metrics.select { |m| m[:code].positive? }.each do |m|
+        dat << "#{[m[:date], m[:code], m[:tests], m[:issues], m[:sha]].join(' ')}\n"
+      end
+      dat.close
+      dat
+    end
+
     def checkout
       dir = Dir.mktmpdir
       Exec.new("git clone --quiet #{@uri} .", dir).stdout
@@ -175,39 +179,41 @@ excludes.map { |e| "':(exclude,glob)#{e}'" }.join(' '),
       hashes.drop_while { |c| c[0] != sha }.map { |c| c[1] }.inject(:+) || 0
     end
 
+    def github_issue_dates
+      client = if @opts[:login]
+        Octokit::Client.new(login: @opts[:login], password: @opts[:password])
+      else
+        Octokit::Client.new(access_token: ENV.fetch('GITHUB_TOKEN', nil))
+      end
+      repo = if @uri.start_with?('git@')
+        @uri.gsub(/^git@github\.com:|\.git$/, '')
+      else
+        @uri.gsub(%r{^https://github\.com/|\.git$}, '')
+      end
+      list = []
+      p = 1
+      loop do
+        page = client.list_issues(
+          repo, state: 'all', page: p
+        ).map(&:created_at)
+        break if page.empty?
+
+        list.concat(page)
+        puts "+#{page.length}/#{list.size} issues from GitHub"
+        p += 1
+      end
+      puts "Loaded #{list.length} issues from GitHub repo '#{repo}'"
+      list
+    end
+
     def issues(commits)
       return @issues unless @issues.nil?
-      dates = if @uri.include?('github.com')
-        client = if @opts[:login]
-          Octokit::Client.new(login: @opts[:login], password: @opts[:password])
-        else
-          Octokit::Client.new
-        end
-        repo = if @uri.start_with?('git@')
-          @uri.gsub(/^git@github\.com:|\.git$/, '')
-        else
-          @uri.gsub(%r{^https://github\.com/|\.git$}, '')
-        end
-        list = []
-        p = 1
-        loop do
-          page = client.list_issues(
-            repo, state: 'all', page: p
-          ).map(&:created_at)
-          break if page.empty?
-          list.concat(page)
-          puts "+#{page.length}/#{list.size} issues from GitHub"
-          p += 1
-        end
-        puts "Loaded #{list.length} issues from GitHub repo '#{repo}'"
-        list
-      else
-        []
-      end
-      @issues = commits.map do |sha, date|
+
+      dates = @uri.include?('github.com') ? github_issue_dates : []
+      @issues = commits.to_h do |sha, date|
         iso = Time.parse(date)
         [sha, dates.select { |d| d < iso }.size]
-      end.to_h
+      end
     end
   end
 end

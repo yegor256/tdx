@@ -1,6 +1,7 @@
-# encoding: utf-8
+# frozen_string_literal: true
+
 #
-# Copyright (c) 2017 Yegor Bugayenko
+# Copyright (c) 2017-2026 Yegor Bugayenko
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the 'Software'), to deal
@@ -33,7 +34,7 @@ def version
   Gem::Specification.load(Dir['*.gemspec'].first).version
 end
 
-task default: [:clean, :test, :features, :rubocop, :copyright]
+task default: %i[clean test features rubocop copyright]
 
 require 'rake/testtask'
 desc 'Run all unit tests'
@@ -46,7 +47,7 @@ end
 
 require 'rdoc/task'
 desc 'Build RDoc documentation'
-Rake::RDocTask.new do |rdoc|
+RDoc::Task.new do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title = "#{name} #{version}"
   rdoc.rdoc_files.include('README*')
@@ -57,7 +58,6 @@ require 'rubocop/rake_task'
 desc 'Run RuboCop on all directories'
 RuboCop::RakeTask.new(:rubocop) do |task|
   task.fail_on_error = true
-  task.requires << 'rubocop-rspec'
 end
 
 require 'cucumber/rake/task'
@@ -65,7 +65,7 @@ Cucumber::Rake::Task.new(:features) do |t|
   Rake::Cleaner.cleanup_files(['coverage'])
   t.profile = 'travis'
 end
-Cucumber::Rake::Task.new(:"features:html") do |t|
+Cucumber::Rake::Task.new(:'features:html') do |t|
   t.profile = 'html_report'
 end
 

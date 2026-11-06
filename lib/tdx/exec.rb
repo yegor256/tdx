@@ -1,4 +1,5 @@
-# encoding: utf-8
+# frozen_string_literal: true
+
 #
 # Copyright (c) 2017 Yegor Bugayenko
 #
@@ -42,7 +43,8 @@ module TDX
     def stdout
       puts "+ #{@cmd}" if @log
       out = `cd #{@dir} && #{@cmd}`
-      raise "This one failed: #{@cmd}" unless $CHILD_STATUS.exitstatus == 0
+      raise "This one failed: #{@cmd}" unless $CHILD_STATUS.exitstatus.zero?
+
       puts out if @log
       out
     end

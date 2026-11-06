@@ -1,4 +1,5 @@
-# encoding: utf-8
+# frozen_string_literal: true
+
 #
 # Copyright (c) 2017 Yegor Bugayenko
 #
@@ -24,12 +25,22 @@ require 'tdx'
 require 'tmpdir'
 require 'minitest/autorun'
 require 'slop'
+require 'open3'
 
 # TDX main module test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2017 Yegor Bugayenko
 # License:: MIT
 class TestPDD < Minitest::Test
+  def test_loads_temporary_directory_support
+    out, status = Open3.capture2e(
+      'bundle', 'exec', 'ruby', '-Ilib', '-rtdx', '-e',
+      'abort "tmpdir missing" unless Dir.respond_to?(:mktmpdir); ' \
+      'abort "tempfile missing" unless defined?(Tempfile)'
+    )
+    assert(status.success?, out)
+  end
+
   def test_git_repo
     skip if Gem.win_platform?
     Dir.mktmpdir 'test' do |dir|
@@ -46,6 +57,7 @@ class TestPDD < Minitest::Test
         mkdir tests
         echo 'c = 3' > tests/3.py && git add tests/3.py && git commit -qam '3'
       ")
+
       assert(
         TDX::Base.new(
           "file:///#{File.join(dir, 'repo')}",
