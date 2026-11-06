@@ -1,4 +1,5 @@
-# encoding: utf-8
+# frozen_string_literal: true
+
 #
 # Copyright (c) 2017 Yegor Bugayenko
 #
@@ -22,3 +23,10 @@
 
 source 'https://rubygems.org'
 gemspec
+
+gem 'cucumber', '~>9.2'
+gem 'minitest', '~>5.27'
+gem 'rake', '~>13.3'
+gem 'rdoc', '~>6.17'
+gem 'rubocop', '~>1.86'
+gem 'simplecov', '~>0.22'

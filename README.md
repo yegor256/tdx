@@ -1,7 +1,7 @@
 [![DevOps By Rultor.com](http://www.rultor.com/b/yegor256/tdx)](http://www.rultor.com/p/yegor256/tdx)
 [![We recommend RubyMine](http://img.teamed.io/rubymine-recommend.svg)](https://www.jetbrains.com/ruby/)
 
-[![Build Status](https://travis-ci.org/yegor256/tdx.svg)](https://travis-ci.org/yegor256/tdx)
+[![Build Status](https://github.com/yegor256/tdx/actions/workflows/rake.yml/badge.svg)](https://github.com/yegor256/tdx/actions/workflows/rake.yml)
 [![PDD status](http://www.0pdd.com/svg?name=yegor256/tdx)](http://www.0pdd.com/p?name=yegor256/tdx)
 [![Gem Version](https://badge.fury.io/rb/tdx.svg)](http://badge.fury.io/rb/tdx)
 [![Dependency Status](https://gemnasium.com/yegor256/tdx.svg)](https://gemnasium.com/yegor256/tdx)
@@ -45,7 +45,7 @@ $ tdx --tests=test/**/* --tests=features/**/* git@github.com:yegor256/tdx.git gr
 
 Read [these guidelines](https://www.yegor256.com/2014/04/15/github-guidelines.html).
 Make sure you build is green before you contribute
-your pull request. You will need to have [Ruby](https://www.ruby-lang.org/en/) 2.3+ and
+your pull request. You will need to have [Ruby](https://www.ruby-lang.org/en/) 3.3+ and
 [Bundler](https://bundler.io/) installed. Then:
 
 ```

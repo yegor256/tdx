@@ -1,5 +1,7 @@
 AllCops:
   DisplayCopNames: true
+  TargetRubyVersion: 3.3
+  NewCops: enable
 
 Metrics/MethodLength:
   Max: 150
@@ -10,11 +12,11 @@ Metrics/AbcSize:
 Metrics/PerceivedComplexity:
   Max: 10
 
-Style/MultilineMethodCallIndentation:
+Layout/MultilineMethodCallIndentation:
   Enabled: false
-Style/IndentationWidth:
+Layout/IndentationWidth:
   Enabled: false
-Style/ElseAlignment:
+Layout/ElseAlignment:
   Enabled: false
-Lint/EndAlignment:
+Layout/EndAlignment:
   Enabled: false

@@ -1,4 +1,5 @@
-# encoding: utf-8
+# frozen_string_literal: true
+
 #
 # Copyright (c) 2017 Yegor Bugayenko
 #
@@ -29,13 +30,13 @@ require 'English'
 Before do
   @cwd = Dir.pwd
   @dir = Dir.mktmpdir('test')
-  FileUtils.mkdir_p(@dir) unless File.exist?(@dir)
+  FileUtils.mkdir_p(@dir)
   Dir.chdir(@dir)
 end
 
 After do
   Dir.chdir(@cwd)
-  FileUtils.rm_rf(@dir) if File.exist?(@dir)
+  FileUtils.rm_rf(@dir)
 end
 
 Given(%r{^I have a Git repository in ./repo$}) do
@@ -60,11 +61,11 @@ When(%r{^I run bin/tdx with "([^"]+)"$}) do |arg|
 end
 
 Then(/^Exit code is zero$/) do
-  raise "Non-zero exit code #{@exitstatus}" unless @exitstatus == 0
+  raise "Non-zero exit code #{@exitstatus}" unless @exitstatus.zero?
 end
 
 Then(/^Exit code is not zero$/) do
-  raise 'Zero exit code' if @exitstatus == 0
+  raise 'Zero exit code' if @exitstatus.zero?
 end
 
 Then(/^SVG is valid in "([^"]+)"$/) do |path|
@@ -79,9 +80,7 @@ Then(/^Stdout is empty$/) do
 end
 
 Then(/^Stdout contains "([^"]*)"$/) do |txt|
-  unless @stdout.include?(txt)
-    raise "STDOUT doesn't contain '#{txt}':\n#{@stdout}"
-  end
+  raise "STDOUT doesn't contain '#{txt}':\n#{@stdout}" unless @stdout.include?(txt)
 end
 
 Given(/^It is Unix$/) do

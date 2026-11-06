@@ -1,4 +1,5 @@
-# encoding: utf-8
+# frozen_string_literal: true
+
 #
 # Copyright (c) 2017 Yegor Bugayenko
 #
@@ -26,4 +27,4 @@ require 'minitest/autorun'
 
 ENV['RACK_ENV'] = 'test'
 
-STDOUT.sync = true
+$stdout.sync = true
