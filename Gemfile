@@ -25,7 +25,7 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'cucumber', '~>12.0'
-gem 'minitest', '~>5.27'
+gem 'minitest', '~>6.0'
 gem 'rake', '~>13.3'
 gem 'rdoc', '~>6.17'
 gem 'rubocop', '~>1.86'
