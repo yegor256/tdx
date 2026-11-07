@@ -27,6 +27,6 @@ gemspec
 gem 'cucumber', '~>12.0'
 gem 'minitest', '~>5.27'
 gem 'rake', '~>13.3'
-gem 'rdoc', '~>6.17'
+gem 'rdoc', '~>8.0'
 gem 'rubocop', '~>1.86'
 gem 'simplecov', '~>0.22'
