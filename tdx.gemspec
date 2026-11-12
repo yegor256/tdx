@@ -42,7 +42,7 @@ Gem::Specification.new do |s|
   s.extra_rdoc_files = ['README.md', 'LICENSE.txt']
   s.add_dependency 'faraday-retry', '~>2.3'
   s.add_dependency 'nokogiri', '~>1.19', '>=1.19.5'
-  s.add_dependency 'octokit', '~>9.0'
+  s.add_dependency 'octokit', '~>10.0'
   s.add_dependency 'slop', '~>4.10'
   s.metadata['rubygems_mfa_required'] = 'true'
 end
